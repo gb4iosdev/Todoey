@@ -26,8 +26,6 @@ class TodoListViewController: UITableViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
-        print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
-        
     }
 
     //MARK: - Tableview Datasource Methods.
@@ -35,11 +33,10 @@ class TodoListViewController: UITableViewController {
         
         let localCell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
         
-        if let item = items?[indexPath.row] {  ///The data item feeding the cell being requested by this call
-        
-            localCell.textLabel?.text = item.title  ///set the cell text
-        
-            localCell.accessoryType = item.done ? .checkmark : .none    ///Set the cell checkmark
+        if items!.count > 0 {
+            localCell.textLabel?.text = items?[indexPath.row].title  ///set the cell text
+            
+            localCell.accessoryType = items![indexPath.row].done ? .checkmark : .none    ///Set the cell checkmark
         } else {
             localCell.textLabel?.text = "No Items Added"
         }
@@ -48,7 +45,11 @@ class TodoListViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return items?.count ?? 1
+        if let numRows = items?.count {
+            return numRows > 0 ? numRows : 1
+        } else {
+            return 1
+        }
     }
     
     //MARK: - Tableview Delegate Methods
@@ -67,8 +68,19 @@ class TodoListViewController: UITableViewController {
         
         tableView.deselectRow(at: indexPath, animated: true)
         tableView.reloadData()
-        
-        
+    }
+    
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete && items?[indexPath.row] != nil {
+            do {
+                try realm.write {
+                    realm.delete(items![indexPath.row])
+                }
+            } catch {
+                print("Error deleting item: \(error)")
+            }
+            tableView.reloadData()
+        }
     }
 
     //MARK: - Add new items
@@ -85,6 +97,7 @@ class TodoListViewController: UITableViewController {
                         let newItem = Item()
                         newItem.title = alert.textFields![0].text!
                         currentCategory.items.append(newItem)
+                        //newItem.dateTimeCreated = Date()
                     }
                 } catch {
                     print("Error saving new Item: \(error)")
@@ -105,7 +118,6 @@ class TodoListViewController: UITableViewController {
     }
     
     //MARK: - Model Manipulation Methods
-   
     
     func loadItems() {
         
@@ -118,30 +130,23 @@ class TodoListViewController: UITableViewController {
 }
 
 //MARK: - SearchBar Methods
-//extension TodoListViewController: UISearchBarDelegate {
-//
-//    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-//
-//        ///Set up the request
-//        let request: NSFetchRequest<Item> = Item.fetchRequest()
-//
-//        ///Setup the query.  [cd] enforces case and diacritic insensitivity
-//        let predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchBar.text!)
-//
-//        let sortDescriptor = NSSortDescriptor(key: "title", ascending: true)
-//        request.sortDescriptors = [sortDescriptor]
-//
-//        loadItems(with: request, andWhereClause: predicate)
-//
-//    }
-//
-//    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-//        if searchBar.text?.count == 0 {
-//            loadItems()
-//            DispatchQueue.main.async {
-//                searchBar.resignFirstResponder()
-//            }
-//        }
-//    }
-//}
+extension TodoListViewController: UISearchBarDelegate {
+
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        
+        items = items?.filter("title CONTAINS[cd] %@", searchBar.text!).sorted(byKeyPath: "dateTimeCreated", ascending: true)
+        
+        tableView.reloadData()
+    }
+
+
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if searchBar.text?.count == 0 {
+            loadItems()
+            DispatchQueue.main.async {
+                searchBar.resignFirstResponder()
+            }
+        }
+    }
+}
 

@@ -18,7 +18,6 @@ class CategoryViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        //print("In CategoryViewController and path is: \(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))")
         loadCategories()
     }
     
@@ -27,13 +26,21 @@ class CategoryViewController: UITableViewController {
         
         let localCell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath)       ///Get a reusable cell from the tableView.
         
-        localCell.textLabel?.text = categories?[indexPath.row].name ?? "No Categories Added Yet" ///set the cell text
+        if categories!.count > 0 {
+            localCell.textLabel?.text = categories?[indexPath.row].name  ///set the cell text
+        } else {
+            localCell.textLabel?.text = "No Categories Added Yet"
+        }
         
         return localCell
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return categories?.count ?? 1
+        if let numRows = categories?.count {
+            return numRows > 0 ? numRows : 1
+        } else {
+            return 1
+        }
     }
     
     //MARK: - Tableview Delegate Methods
@@ -51,6 +58,22 @@ class CategoryViewController: UITableViewController {
         
         if let indexPath = tableView.indexPathForSelectedRow {
             destinationVC.selectedCategory = categories?[indexPath.row]
+        }
+    }
+    
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete && categories?[indexPath.row] != nil {
+            do {
+                try realm.write {
+                    for eachItem in categories![indexPath.row].items {
+                        realm.delete(eachItem)
+                    }
+                    realm.delete(categories![indexPath.row])
+                }
+            } catch {
+                print("Error deleting category: \(error)")
+            }
+            tableView.reloadData()
         }
     }
 
