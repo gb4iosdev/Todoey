@@ -16,6 +16,7 @@
 		866256C220704A0C00E15371 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 866256C020704A0C00E15371 /* Main.storyboard */; };
 		866256C420704A0C00E15371 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 866256C320704A0C00E15371 /* Assets.xcassets */; };
 		866256C720704A0C00E15371 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 866256C520704A0C00E15371 /* LaunchScreen.storyboard */; };
+		86E60E3C2082C77D00228FE4 /* SwipeTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86E60E3B2082C77D00228FE4 /* SwipeTableViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +31,7 @@
 		866256C320704A0C00E15371 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		866256C620704A0C00E15371 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		866256C820704A0C00E15371 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		86E60E3B2082C77D00228FE4 /* SwipeTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeTableViewController.swift; sourceTree = "<group>"; };
 		8C7E6FD42A5C61A3DA7DE1BC /* Pods_Todoey.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Todoey.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		A5946225B1A8002B0A41D92B /* Pods-Todoey.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Todoey.release.xcconfig"; path = "Pods/Target Support Files/Pods-Todoey/Pods-Todoey.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -99,6 +101,7 @@
 			children = (
 				8644B634207D2AB000DEDA81 /* CategoryViewController.swift */,
 				866256BE20704A0C00E15371 /* TodoListViewController.swift */,
+				86E60E3B2082C77D00228FE4 /* SwipeTableViewController.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -266,6 +269,7 @@
 				8644B635207D2AB000DEDA81 /* CategoryViewController.swift in Sources */,
 				866256BF20704A0C00E15371 /* TodoListViewController.swift in Sources */,
 				866256BD20704A0C00E15371 /* AppDelegate.swift in Sources */,
+				86E60E3C2082C77D00228FE4 /* SwipeTableViewController.swift in Sources */,
 				8649384E207EC6C00054C471 /* Category.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
