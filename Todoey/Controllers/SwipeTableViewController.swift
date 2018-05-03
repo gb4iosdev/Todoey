@@ -8,11 +8,16 @@
 
 import UIKit
 import SwipeCellKit
+import ChameleonFramework
 
 class SwipeTableViewController: UITableViewController, SwipeTableViewCellDelegate {
+    
+    var italicTextHeight: CGFloat = 20.0
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        tableView.rowHeight = 80.0
+        tableView.separatorStyle = .none
     }
     
     //MARK: - TableView Datasource Methods.
@@ -21,7 +26,12 @@ class SwipeTableViewController: UITableViewController, SwipeTableViewCellDelegat
         
         let localCell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! SwipeTableViewCell      ///Get a reusable cell from the tableView.
         
-        localCell.delegate = self
+        if localCell.textLabel?.text == nil {   ///cell is new, not dequeued
+            //localCell.backgroundColor = UIColor.randomFlat
+            localCell.delegate = self
+        }
+        
+        
         
         return localCell
     }

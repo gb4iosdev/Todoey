@@ -8,8 +8,9 @@
 
 import UIKit
 import RealmSwift
+import ChameleonFramework
 
-class TodoListViewController: UITableViewController {
+class TodoListViewController: SwipeTableViewController {
     
     let realm = try! Realm()
     
@@ -21,27 +22,73 @@ class TodoListViewController: UITableViewController {
         }
     }
     
+    @IBOutlet weak var searchBar: UISearchBar!
+    
     override func viewDidLoad() {
         
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
         
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        
+        title = selectedCategory?.name
+        
+        guard let colourHex = selectedCategory?.bgColour else {
+            fatalError("Category colour missing")
+        }
+        
+        updateNavBar(withHexCode: colourHex)
+        
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        
+        updateNavBar(withHexCode: "3B96DA")
+//        guard let originalColour = HexColor("3B96DA") else {
+//            fatalError("Can't convert original colour from hex")
+//        }
+//        navigationController?.navigationBar.barTintColor = originalColour
+//        navigationController?.navigationBar.tintColor = FlatWhite()
+//        navigationController?.navigationBar.largeTitleTextAttributes = [NSAttributedStringKey.foregroundColor: FlatWhite()]
+    }
+    
+    //MARK: - Navbar setup methods:
+    
+    func updateNavBar (withHexCode colourHexCode: String) {
+        
+        guard let navBar = navigationController?.navigationBar else {
+            fatalError("Navigation Controller does not exist")
+        }
+        
+        guard let navBarColour = HexColor(colourHexCode) else {
+            fatalError("Category colour hex can't be converted to colour")
+        }
+        
+        navBar.barTintColor = navBarColour
+        navBar.tintColor = ContrastColorOf(navBarColour, returnFlat: true)
+        navBar.largeTitleTextAttributes = [NSAttributedStringKey.foregroundColor: ContrastColorOf(navBarColour, returnFlat: true)]
+        
+        searchBar.barTintColor = navBarColour
     }
 
     //MARK: - Tableview Datasource Methods.
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let localCell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         
         if items!.count > 0 {
-            localCell.textLabel?.text = items?[indexPath.row].title  ///set the cell text
-            
-            localCell.accessoryType = items![indexPath.row].done ? .checkmark : .none    ///Set the cell checkmark
+            cell.textLabel?.text = items?[indexPath.row].title  ///set the cell text
+            cell.accessoryType = items![indexPath.row].done ? .checkmark : .none    ///Set the cell checkmark
+            if let colour = HexColor((selectedCategory?.bgColour)!)?.darken(byPercentage: (CGFloat(indexPath.row)/CGFloat(items!.count*4))) {  ///set the background colour
+                cell.backgroundColor = colour
+            }
+            cell.textLabel?.textColor = ContrastColorOf(cell.backgroundColor!, returnFlat: true)    ///set a contrasting text colour
         } else {
-            localCell.textLabel?.text = "No Items Added"
+            cell.textLabel?.text = "No Items Added"
         }
         
-        return localCell
+        return cell
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -54,7 +101,11 @@ class TodoListViewController: UITableViewController {
     
     //MARK: - Tableview Delegate Methods
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        
+        ///Trying to implement in-situ editing of cells but this code below from the internet doesn't work.
+//        let ixPath = NSIndexPath(row: indexPath.row, section: indexPath.section)
+//        tableView.beginUpdates()
+//        self.tableView.reloadRows(at: [ixPath as IndexPath], with: UITableViewRowAnimation.none)
+//        tableView.endUpdates()
         if let item = items?[indexPath.row] {
             do {
                 try realm.write {
@@ -63,24 +114,11 @@ class TodoListViewController: UITableViewController {
             } catch {
                 print("Error updating done status of Item: \(error)")
             }
-            
+
         }
-        
+
         tableView.deselectRow(at: indexPath, animated: true)
         tableView.reloadData()
-    }
-    
-    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
-        if editingStyle == .delete && items?[indexPath.row] != nil {
-            do {
-                try realm.write {
-                    realm.delete(items![indexPath.row])
-                }
-            } catch {
-                print("Error deleting item: \(error)")
-            }
-            tableView.reloadData()
-        }
     }
 
     //MARK: - Add new items
@@ -124,6 +162,20 @@ class TodoListViewController: UITableViewController {
         items = selectedCategory?.items.sorted(byKeyPath: "title", ascending: true)
 
         tableView.reloadData()
+    }
+    
+    override func updateModel(at indexPath: IndexPath) {
+        
+        if let itemForDeletion = items?[indexPath.row] {
+            do {
+                try realm.write {
+                    realm.delete(itemForDeletion)
+                }
+            } catch {
+                print("Error deleting category: \(error)")
+            }
+            //tableView.reloadData()
+        }
     }
     
     

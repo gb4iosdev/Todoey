@@ -8,27 +8,55 @@
 
 import UIKit
 import RealmSwift
+import ChameleonFramework
 
 class CategoryViewController: SwipeTableViewController {
     
     let realm = try! Realm()
     
     var categories: Results<Category>?
+    var addedCellRow: Int?              ///The row of the most recently added cell, for animation
+    var viewHasLoaded = false     ///For cascade animation on initial load
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        //loadCategories()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
         loadCategories()
-        tableView.rowHeight = 80.0
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        ///Don't re-do on-start animation
+        viewHasLoaded = true
     }
     
     //MARK: - Tableview Datasource Methods
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        
         let cell = super.tableView(tableView, cellForRowAt: indexPath)
-        if categories!.count > 0 {
-            cell.textLabel?.text = categories?[indexPath.row].name  ///set the cell text
+        if !categories!.isEmpty  {     //let cat = categories?[indexPath.row],
+            let cat = categories![indexPath.row]
+            cell.textLabel?.font = UIFont.systemFont(ofSize: 20.0)
+            cell.textLabel?.text = cat.name  ///set the cell text
+            cell.backgroundColor = HexColor((cat.bgColour)) ///set the background colour
+            cell.textLabel?.textColor = UIColor(contrastingBlackOrWhiteColorOn: cell.backgroundColor!, isFlat: true)    ///set a contrasting text colour
+            cell.detailTextLabel?.font = UIFont.systemFont(ofSize: 14.0)
+            let subTitleTrailingText = cat.items.count == 1 ? "item" : "items"
+            cell.detailTextLabel?.text = "\(categories?[indexPath.row].items.count ?? 0) \(subTitleTrailingText)"
+            cell.detailTextLabel?.textColor = UIColor(contrastingBlackOrWhiteColorOn: cell.backgroundColor!, isFlat: true)    ///set a contrasting text colour for subtitle
+            if !viewHasLoaded {
+                animateIn(cell: cell, withDelay: 0.15 * Double(indexPath.row))
+            }
+            if addedCellRow != nil && indexPath.row == addedCellRow {
+                animateIn(cell: cell, withDelay: 0.2)
+                addedCellRow = nil
+            }
         } else {
-            cell.textLabel?.text = "No Categories Added Yet"
+            cell.textLabel?.font = UIFont.italicSystemFont(ofSize: italicTextHeight)
+            cell.textLabel?.textColor = UIColor.lightGray
+            cell.textLabel?.text = "Tap to add new category"
+            animateIn(cell: cell, withDelay: 0.0)
         }
         
         return cell
@@ -56,25 +84,11 @@ class CategoryViewController: SwipeTableViewController {
         ///But how to get the indexPath here while we're preparing for Segue?
         
         if let indexPath = tableView.indexPathForSelectedRow {
-            destinationVC.selectedCategory = categories?[indexPath.row]
+            //if categories!.count > 0 {
+                destinationVC.selectedCategory = categories?[indexPath.row]
+            //}
         }
     }
-    
-//    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
-//        if editingStyle == .delete && categories?[indexPath.row] != nil {
-//            do {
-//                try realm.write {
-//                    for eachItem in categories![indexPath.row].items {
-//                        realm.delete(eachItem)
-//                    }
-//                    realm.delete(categories![indexPath.row])
-//                }
-//            } catch {
-//                print("Error deleting category: \(error)")
-//            }
-//            tableView.reloadData()
-//        }
-//    }
 
     //MARK: - Add New Categories
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
@@ -86,7 +100,9 @@ class CategoryViewController: SwipeTableViewController {
             
             let newCategory = Category()
             newCategory.name = alert.textFields![0].text!
+            newCategory.bgColour = UIColor.randomFlat.hexValue()
             
+            self.addedCellRow = self.categories?.count
             self.save(category: newCategory)
         }
         
@@ -138,5 +154,17 @@ class CategoryViewController: SwipeTableViewController {
             }
             //tableView.reloadData()
         }
+    }
+    
+    fileprivate func animateIn(cell: UITableViewCell, withDelay delay: TimeInterval) {
+        let initialScale: CGFloat = 1.2
+        let duration: TimeInterval = 0.6
+        
+        cell.alpha = 0.0
+        cell.layer.transform = CATransform3DMakeScale(initialScale, initialScale, 1)
+        UIView.animate(withDuration: duration, delay: delay, options: UIViewAnimationOptions.curveEaseOut, animations: {
+            cell.alpha = 1.0
+            cell.layer.transform = CATransform3DIdentity
+        }, completion: nil)
     }
 }
