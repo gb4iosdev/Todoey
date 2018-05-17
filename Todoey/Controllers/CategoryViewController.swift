@@ -27,6 +27,10 @@ class CategoryViewController: SwipeTableViewController {
         loadCategories()
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        viewHasLoaded = true
+    }
+    
     override func viewDidDisappear(_ animated: Bool) {
         ///Don't re-do on-start animation
         viewHasLoaded = true
@@ -34,7 +38,7 @@ class CategoryViewController: SwipeTableViewController {
     
     //MARK: - Tableview Datasource Methods
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = super.tableView(tableView, cellForRowAt: indexPath)
+        let cell = super.tableView(tableView, cellForRowAt: indexPath) as! GBTableViewCell
         if !categories!.isEmpty  {     //let cat = categories?[indexPath.row],
             let cat = categories![indexPath.row]
             cell.textLabel?.font = UIFont.systemFont(ofSize: 20.0)

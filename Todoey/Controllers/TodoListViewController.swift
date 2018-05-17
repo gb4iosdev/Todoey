@@ -45,12 +45,6 @@ class TodoListViewController: SwipeTableViewController {
     override func viewWillDisappear(_ animated: Bool) {
         
         updateNavBar(withHexCode: "3B96DA")
-//        guard let originalColour = HexColor("3B96DA") else {
-//            fatalError("Can't convert original colour from hex")
-//        }
-//        navigationController?.navigationBar.barTintColor = originalColour
-//        navigationController?.navigationBar.tintColor = FlatWhite()
-//        navigationController?.navigationBar.largeTitleTextAttributes = [NSAttributedStringKey.foregroundColor: FlatWhite()]
     }
     
     //MARK: - Navbar setup methods:
@@ -80,7 +74,7 @@ class TodoListViewController: SwipeTableViewController {
         if items!.count > 0 {
             cell.textLabel?.text = items?[indexPath.row].title  ///set the cell text
             cell.accessoryType = items![indexPath.row].done ? .checkmark : .none    ///Set the cell checkmark
-            if let colour = HexColor((selectedCategory?.bgColour)!)?.darken(byPercentage: (CGFloat(indexPath.row)/CGFloat(items!.count*4))) {  ///set the background colour
+            if let colour = HexColor((selectedCategory?.bgColour)!)?.darken(byPercentage: (CGFloat(indexPath.row)/CGFloat(items!.count*3))) {  ///set the background colour
                 cell.backgroundColor = colour
             }
             cell.textLabel?.textColor = ContrastColorOf(cell.backgroundColor!, returnFlat: true)    ///set a contrasting text colour

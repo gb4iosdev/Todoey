@@ -15,7 +15,8 @@ class SwipeTableViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        tableView.rowHeight = 80.0
+        //tableView.register(GBTableViewCell.self, forCellReuseIdentifier: "Cell")
+        tableView.rowHeight = 60.0
         tableView.separatorStyle = .none
     }
     
@@ -23,14 +24,14 @@ class SwipeTableViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let localCell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) //as! SwipeTableViewCell      ///Get a reusable cell from the tableView.
+        let localCell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! GBTableViewCell      ///Get a reusable cell from the tableView.
         
         if localCell.textLabel?.text == nil {   ///cell is new, not dequeued
             //localCell.backgroundColor = UIColor.randomFlat
             //localCell.delegate = self
         }
         
-        
+        localCell.textLabel?.backgroundColor = UIColor.clear
         
         return localCell
     }
